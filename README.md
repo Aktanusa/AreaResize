@@ -10,8 +10,8 @@ AreaResize(int width, int height)
 
 ## Supported Colorspaces
 
-8-bit Planar (YV24/YV16/YV12/YV411/Y8) (YUY2 is not supported; use YV12)
-8-bit Interleaved (RGB32/RGB24) (gamma corrected)
+- 8-bit Planar (YV24/YV16/YV12/YV411/Y8) (YUY2 is not supported; use YV12)
+- 8-bit Interleaved (RGB32/RGB24) (gamma corrected)
 
 ## Features
 
