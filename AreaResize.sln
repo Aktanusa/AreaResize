@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AreaResize", "AreaResize\AreaResize.vcxproj", "{19255C19-8DFF-41E1-AC39-FA5389532A48}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8C5E3E13-D4E3-4F79-985D-E59CEA3EAEC8}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		readme_org.txt = readme_org.txt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{19255C19-8DFF-41E1-AC39-FA5389532A48}.Debug|x64.ActiveCfg = Debug|x64
+		{19255C19-8DFF-41E1-AC39-FA5389532A48}.Debug|x64.Build.0 = Debug|x64
+		{19255C19-8DFF-41E1-AC39-FA5389532A48}.Debug|x86.ActiveCfg = Debug|Win32
+		{19255C19-8DFF-41E1-AC39-FA5389532A48}.Debug|x86.Build.0 = Debug|Win32
+		{19255C19-8DFF-41E1-AC39-FA5389532A48}.Release|x64.ActiveCfg = Release|x64
+		{19255C19-8DFF-41E1-AC39-FA5389532A48}.Release|x64.Build.0 = Release|x64
+		{19255C19-8DFF-41E1-AC39-FA5389532A48}.Release|x86.ActiveCfg = Release|Win32
+		{19255C19-8DFF-41E1-AC39-FA5389532A48}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA9F3D43-4EE8-453D-981E-14F473AC6D7B}
+	EndGlobalSection
+EndGlobal
