@@ -23,12 +23,12 @@
 #include <ppl.h>
 #include "avisynth.h"
 
-#define VERSION 1.0
-
 #define RGB_PIXEL_RANGE 256
 #define RGB_PIXEL_RANGE_EXTENDED 25501
 #define GAMMA 2.2
 #define DOUBLE_ROUND_MAGIC_NUMBER 6755399441055744.0
+
+extern const std::string version = "1.0";
 
 typedef struct {
     unsigned short src_width;
@@ -357,6 +357,7 @@ bool AreaResize::ResizeVerticalRGB(BYTE* dstp, const int dst_pitch, const BYTE* 
 				}
 				switch (ps) {
 				case 3:
+					// Repeated for SIMD
 					blue += ((local_lin_LUT[curSrcp[index_src]]) * partial);
 					green += ((local_lin_LUT[curSrcp[index_src + 1]]) * partial);
 					red += ((local_lin_LUT[curSrcp[index_src + 2]]) * partial);
@@ -377,6 +378,7 @@ bool AreaResize::ResizeVerticalRGB(BYTE* dstp, const int dst_pitch, const BYTE* 
 			BYTE blueValue, greenValue, redValue, alphaValue;
 			switch (ps) {
 			case 3:
+				// Repeated for SIMD
 				blue = (blue * invert_den_hun) + DOUBLE_ROUND_MAGIC_NUMBER;
 				green = (green * invert_den_hun) + DOUBLE_ROUND_MAGIC_NUMBER;
 				red = (red * invert_den_hun) + DOUBLE_ROUND_MAGIC_NUMBER;
@@ -484,5 +486,6 @@ AVSValue __cdecl CreateAreaResize(AVSValue args, void* user_data, IScriptEnviron
 
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env) {
     env->AddFunction("AreaResize", "c[width]i[height]i", CreateAreaResize, 0);
-    return "AreaResize for AviSynth 0.1.0";
+	std::string result = "AreaResize for AviSynth " + version;
+    return result.c_str();
 }
