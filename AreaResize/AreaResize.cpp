@@ -18,17 +18,20 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <windows.h>
-#include <math.h>
-#include <ppl.h>
-#include "avisynth.h"
-
 #define RGB_PIXEL_RANGE 256
 #define RGB_PIXEL_RANGE_EXTENDED 25501
 #define GAMMA 2.2
 #define DOUBLE_ROUND_MAGIC_NUMBER 6755399441055744.0
 
-extern const std::string version = "1.0";
+#include <windows.h>
+#include <math.h>
+#include <ppl.h>
+#include <string>
+#include "avisynth.h"
+
+const int version_major = 1;
+const int version_minor = 0;
+
 
 typedef struct {
     unsigned short src_width;
@@ -50,10 +53,12 @@ private:
 	double linear_LUT[RGB_PIXEL_RANGE];
 	BYTE gamma_LUT[RGB_PIXEL_RANGE_EXTENDED];
 
-	static const int num_plane = 3;
-	params_t params[num_plane];
+	static const int total_planes = 3;
+	const int plane[total_planes] = { PLANAR_Y, PLANAR_U, PLANAR_V };
+	params_t params[total_planes];
 
 	BYTE plane_size;
+	BYTE num_process_plane;
 
 	BYTE* buff;
 
@@ -84,6 +89,8 @@ AreaResize::AreaResize(PClip _child, int target_width, int target_height, IScrip
 	plane_size = vi.IsRGB32() ? 4 : vi.IsRGB24() ? 3 : 1;
 	const BYTE ps = plane_size;
 
+	num_process_plane = vi.IsRGB32() || vi.IsRGB24() || vi.IsY8() ? 1 : 3;
+
 	buff = NULL;
     if (target_width != vi.width) {
         buff = (BYTE *)malloc(sizeof(double) * target_width * vi.height * ps);
@@ -92,11 +99,11 @@ AreaResize::AreaResize(PClip _child, int target_width, int target_height, IScrip
         }
     }
 
-    for (int i = 0; i < num_plane; i++) {
-        params[i].src_width     = i ? vi.width / vi.SubsampleH() : vi.width;
-        params[i].src_height    = i ? vi.height / vi.SubsampleV() : vi.height;
-        params[i].target_width  = i ? target_width / vi.SubsampleH() : target_width;
-        params[i].target_height = i ? target_height / vi.SubsampleV() : target_height;
+    for (int i = 0; i < num_process_plane; i++) {
+        params[i].src_width     = i ? vi.width / (int)pow(2, vi.GetPlaneWidthSubsampling(plane[i])) : vi.width;
+        params[i].src_height    = i ? vi.height / (int)pow(2, vi.GetPlaneHeightSubsampling(plane[i])) : vi.height;
+        params[i].target_width  = i ? target_width / (int)pow(2, vi.GetPlaneWidthSubsampling(plane[i])) : target_width;
+        params[i].target_height = i ? target_height / (int)pow(2, vi.GetPlaneHeightSubsampling(plane[i])) : target_height;
 		int gcd_h = gcd(params[i].src_width, params[i].target_width);
 		int gcd_v = gcd(params[i].src_height, params[i].target_height);
 		params[i].num_h = params[i].target_width / gcd_h;
@@ -424,8 +431,7 @@ PVideoFrame AreaResize::GetFrame(int n, IScriptEnvironment* env) {
 
     PVideoFrame dst = env->NewVideoFrame(vi);
 
-    int plane[] = {PLANAR_Y, PLANAR_U, PLANAR_V};
-    for (int i = 0, time = vi.IsInterleaved() ? 1 : 3; i < time; i++) {
+    for (int i = 0, time = num_process_plane; i < time; i++) {
         const BYTE* srcp = src->GetReadPtr(plane[i]);
         int src_pitch = src->GetPitch(plane[i]);
 
@@ -465,9 +471,9 @@ AVSValue __cdecl CreateAreaResize(AVSValue args, void* user_data, IScriptEnviron
     }
 
     const VideoInfo& vi = clip->GetVideoInfo();
-    if (vi.IsYUY2()) {
-        env->ThrowError("AreaResize: Unsupported colorspace(YUY2).");
-    }
+	if (!vi.IsRGB32() && !vi.IsRGB24() && !vi.IsYV24() && !vi.IsYV16() && !vi.IsYV12() && !vi.IsYV411() && !vi.IsY8()) {
+		env->ThrowError("AreaResize: Unsupported colorspace.");
+	}
     if (vi.IsYV411() && target_width & 3) {
         env->ThrowError("AreaResize: Target width requires mod 4.");
     }
@@ -484,8 +490,10 @@ AVSValue __cdecl CreateAreaResize(AVSValue args, void* user_data, IScriptEnviron
     return new AreaResize(clip, target_width, target_height, env);
 }
 
-extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env) {
+const AVS_Linkage *AVS_linkage = 0;
+extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScriptEnvironment* env, const AVS_Linkage* const vectors) {
+	AVS_linkage = vectors;
     env->AddFunction("AreaResize", "c[width]i[height]i", CreateAreaResize, 0);
-	std::string result = "AreaResize for AviSynth " + version;
+	std::string result = "AreaResize for AviSynth " + std::to_string(version_major) + "." + std::to_string(version_minor);
     return result.c_str();
 }
